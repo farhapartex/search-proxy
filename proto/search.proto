@@ -1,0 +1,117 @@
+// Protocol Buffer definition for Federated Search Engine
+// Version: 1.0
+// This file defines the gRPC service contract between Python (client) and Go (server)
+
+syntax = "proto3";
+
+package search;
+
+// Go package path for generated code
+option go_package = "github.com/farhapartex/search-proxy/proto";
+
+// ============================================================================
+// SERVICES
+// ============================================================================
+
+// SearchService provides federated search capabilities across multiple platforms
+service SearchService {
+  // FederatedSearch performs concurrent searches across GitHub, StackOverflow, and Reddit
+  // Returns unified results within 500ms timeout
+  rpc FederatedSearch (SearchRequest) returns (SearchResponse);
+
+  // HealthCheck returns the health status of the service
+  rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// ============================================================================
+// REQUEST MESSAGES
+// ============================================================================
+
+// SearchRequest contains the search query and parameters
+message SearchRequest {
+  // The search query string (required)
+  // Example: "React performance optimization"
+  string query = 1;
+
+  // Maximum number of results to return per platform (optional)
+  // Default: 20, Range: 1-100
+  int32 max_results = 2;
+
+  // List of platforms to search (optional)
+  // If empty, searches all platforms: ["github", "stackoverflow", "reddit"]
+  // Valid values: "github", "stackoverflow", "reddit"
+  repeated string platforms = 3;
+}
+
+// HealthCheckRequest for service health monitoring
+message HealthCheckRequest {
+  // Optional: service name to check
+  string service = 1;
+}
+
+// ============================================================================
+// RESPONSE MESSAGES
+// ============================================================================
+
+// SearchResponse contains the aggregated search results
+message SearchResponse {
+  // List of search results from all platforms
+  repeated Result results = 1;
+
+  // Total number of results returned
+  int32 total_count = 2;
+
+  // Platforms that successfully returned results
+  repeated string platforms_success = 3;
+
+  // Platforms that timed out (exceeded 400ms)
+  repeated string platforms_timeout = 4;
+
+  // Platforms that returned errors
+  repeated string platforms_error = 5;
+
+  // Response metadata
+  ResponseMetadata metadata = 6;
+}
+
+// Result represents a single search result from any platform
+message Result {
+  // Platform source: "github", "stackoverflow", "reddit"
+  string platform = 1;
+
+  // Result title
+  string title = 2;
+
+  // Short snippet/description (max 500 chars)
+  string snippet = 3;
+
+  // Direct URL to the resource
+  string url = 4;
+
+  // Unix timestamp (seconds since epoch)
+  int64 timestamp = 5;
+
+  // Platform-specific metadata (stars, votes, comments, etc.)
+  map<string, string> metadata = 6;
+}
+
+// ResponseMetadata provides information about the search execution
+message ResponseMetadata {
+  // Total response time in milliseconds
+  int32 response_time_ms = 1;
+
+  // Number of platforms queried
+  int32 platforms_queried = 2;
+}
+
+// HealthCheckResponse indicates service health
+message HealthCheckResponse {
+  // Health status: "healthy", "degraded", "unhealthy"
+  string status = 1;
+
+  // Service version
+  string version = 2;
+
+  // Timestamp of health check
+  int64 timestamp = 3;
+}
