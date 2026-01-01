@@ -13,14 +13,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Server implements the gRPC SearchService
 type Server struct {
 	pb.UnimplementedSearchServiceServer
 	searchHandler *handlers.SearchHandler
 	config        *config.Config
 }
 
-// NewServer creates a new gRPC server
 func NewServer(cfg *config.Config) *Server {
 	return &Server{
 		searchHandler: handlers.NewSearchHandler(cfg),
@@ -28,9 +26,7 @@ func NewServer(cfg *config.Config) *Server {
 	}
 }
 
-// FederatedSearch performs a federated search across multiple platforms
 func (s *Server) FederatedSearch(ctx context.Context, req *pb.SearchRequest) (*pb.SearchResponse, error) {
-	// Validate request
 	if err := s.validateSearchRequest(req); err != nil {
 		return nil, err
 	}
@@ -38,11 +34,9 @@ func (s *Server) FederatedSearch(ctx context.Context, req *pb.SearchRequest) (*p
 	log.Printf("Received search request: query=%q, max_results=%d, platforms=%v",
 		req.Query, req.MaxResults, req.Platforms)
 
-	// Create a context with timeout
 	searchCtx, cancel := context.WithTimeout(ctx, s.config.Server.ServerTimeout)
 	defer cancel()
 
-	// Perform search
 	response, err := s.searchHandler.Search(searchCtx, req)
 	if err != nil {
 		log.Printf("Search failed: %v", err)
@@ -52,7 +46,6 @@ func (s *Server) FederatedSearch(ctx context.Context, req *pb.SearchRequest) (*p
 	return response, nil
 }
 
-// HealthCheck returns the health status of the service
 func (s *Server) HealthCheck(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
 	log.Printf("Health check requested for service: %s", req.Service)
 
@@ -63,19 +56,15 @@ func (s *Server) HealthCheck(ctx context.Context, req *pb.HealthCheckRequest) (*
 	}, nil
 }
 
-// validateSearchRequest validates the search request
 func (s *Server) validateSearchRequest(req *pb.SearchRequest) error {
-	// Validate query
 	if req.Query == "" {
 		return status.Error(codes.InvalidArgument, "query cannot be empty")
 	}
 
-	// Validate query length
 	if len(req.Query) > 500 {
 		return status.Error(codes.InvalidArgument, "query too long (max 500 characters)")
 	}
 
-	// Validate max_results
 	if req.MaxResults < 0 {
 		return status.Error(codes.InvalidArgument, "max_results cannot be negative")
 	}
@@ -84,7 +73,6 @@ func (s *Server) validateSearchRequest(req *pb.SearchRequest) error {
 		return status.Error(codes.InvalidArgument, "max_results cannot exceed 100")
 	}
 
-	// Validate platforms
 	validPlatforms := map[string]bool{
 		"github":        true,
 		"stackoverflow": true,
