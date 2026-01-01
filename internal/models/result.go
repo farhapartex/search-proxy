@@ -17,7 +17,6 @@ type SearchResult struct {
 	Metadata  map[string]string
 }
 
-// NewSearchResult creates a new SearchResult
 func NewSearchResult(platform, title, snippet, url string) *SearchResult {
 	return &SearchResult{
 		Platform:  platform,
@@ -29,7 +28,6 @@ func NewSearchResult(platform, title, snippet, url string) *SearchResult {
 	}
 }
 
-// ToProto converts SearchResult to protobuf Result
 func (r *SearchResult) ToProto() *pb.Result {
 	return &pb.Result{
 		Platform:  r.Platform,
@@ -41,7 +39,6 @@ func (r *SearchResult) ToProto() *pb.Result {
 	}
 }
 
-// FetchResult represents the result of a platform fetch operation
 type FetchResult struct {
 	Platform string
 	Results  []*SearchResult
@@ -50,7 +47,6 @@ type FetchResult struct {
 	TimedOut bool
 }
 
-// NewFetchResult creates a new FetchResult
 func NewFetchResult(platform string) *FetchResult {
 	return &FetchResult{
 		Platform: platform,

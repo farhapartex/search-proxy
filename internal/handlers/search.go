@@ -84,7 +84,9 @@ func (h *SearchHandler) Search(ctx context.Context, req *pb.SearchRequest) (*pb.
 	var platformsError []string
 
 	for fetchResult := range resultsChan {
+
 		if fetchResult.Error != nil {
+			log.Printf(fetchResult.Error.Error())
 			if fetchResult.TimedOut {
 				platformsTimeout = append(platformsTimeout, fetchResult.Platform)
 				log.Printf("Platform %s timed out: %v", fetchResult.Platform, fetchResult.Error)

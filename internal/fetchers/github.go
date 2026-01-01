@@ -52,9 +52,10 @@ func (g *GitHubFetcher) Fetch(ctx context.Context, query string, maxResults int)
 	}
 
 	// Add headers
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
+	//req.Header.Set("Accept", "application/vnd.github.v3+json")
 	if g.apiToken != "" {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", g.apiToken))
+		req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 	}
 
 	// Execute request
